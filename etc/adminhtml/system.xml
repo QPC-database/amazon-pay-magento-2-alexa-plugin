@@ -24,7 +24,7 @@
                     <field id="active" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                         <label>Enable Alexa Delivery Notifications</label>
                         <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                        <comment><![CDATA[<a href="https://github.com/amzn/amazon-payments-magento-plugin/wiki/Installation-and-Quick-Start-Guide#alexa-delivery-notifications" target="_blank">Refer here for more information on Alexa Delivery Notifications</a><style>#payment_ap_alexa_alexa_private_key{height:3.5em;}</style>]]></comment>
+                        <comment><![CDATA[<a href="https://github.com/amzn/amazon-pay-magento-2-alexa-plugin#extension-to-enable-amazon-pay-alexa-features-on-magento-2" target="_blank">Refer here for more information on Alexa Delivery Notifications</a><style>#payment_ap_alexa_alexa_private_key{height:3.5em;}</style>]]></comment>
                         <config_path>payment/amazon_payment/alexa_active</config_path>
                     </field>
                     <field id="private_key" translate="label comment" type="textarea" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="0">
