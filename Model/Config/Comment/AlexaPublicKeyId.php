@@ -25,11 +25,6 @@ class AlexaPublicKeyId implements \Magento\Config\Model\Config\CommentInterface
     private $alexaConfig;
 
     /**
-     * @var \Amazon\Core\Model\AmazonConfig
-     */
-    private $amazonConfig;
-
-    /**
      * @var \Amazon\Core\Helper\Data
      */
     private $coreHelper;
@@ -48,20 +43,17 @@ class AlexaPublicKeyId implements \Magento\Config\Model\Config\CommentInterface
      * AlexaComment constructor.
      *
      * @param \Amazon\Alexa\Model\AlexaConfig $alexaConfig
-     * @param \Amazon\Core\Model\AmazonConfig $amazonConfig
      * @param \Amazon\Core\Helper\Data $coreHelper
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Amazon\Alexa\Model\Alexa $alexaModel
      */
     public function __construct(
         \Amazon\Alexa\Model\AlexaConfig $alexaConfig,
-        \Amazon\Core\Model\AmazonConfig $amazonConfig,
         \Amazon\Core\Helper\Data $coreHelper,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Amazon\Alexa\Model\Alexa $alexaModel
     ) {
         $this->alexaConfig      = $alexaConfig;
-        $this->amazonConfig     = $amazonConfig;
         $this->coreHelper       = $coreHelper;
         $this->storeManager     = $storeManager;
         $this->alexaModel       = $alexaModel;
@@ -83,7 +75,7 @@ class AlexaPublicKeyId implements \Magento\Config\Model\Config\CommentInterface
 
         if (!$pubkeyid && $privkey) {
             $merchantId = $this->coreHelper->getMerchantId();
-            $paymentRegion = strtoupper($this->amazonConfig->getPaymentRegion());
+            $paymentRegion = strtoupper($this->coreHelper->getPaymentRegion());
             $subject = rawurlencode(sprintf('Request for Amazon Pay Public Key ID for %s (%s)', $merchantId, $paymentRegion));
             $body = rawurlencode("Merchant ID: $merchantId\n\nPublic Key:\n\n$pubkey");
             $comment = __(

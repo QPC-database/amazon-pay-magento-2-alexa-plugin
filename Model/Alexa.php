@@ -26,11 +26,6 @@ class Alexa
     private $alexaConfig;
 
     /**
-     * @var \Amazon\Core\Model\AmazonConfig
-     */
-    private $amazonConfig;
-
-    /**
      * @var \Amazon\Core\Helper\Data
      */
     private $coreHelper;
@@ -63,7 +58,6 @@ class Alexa
     /**
      * Alexa constructor.
      * @param AlexaConfig $alexaConfig
-     * @param \Amazon\Core\Model\AmazonConfig $amazonConfig
      * @param \Amazon\Alexa\Logger\AlexaLogger $alexaLogger
      * @param \Amazon\Alexa\Model\AlexaCarrierFactory $carrierFactory
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
@@ -72,7 +66,6 @@ class Alexa
      */
     public function __construct(
         AlexaConfig $alexaConfig,
-        \Amazon\Core\Model\AmazonConfig $amazonConfig,
         \Amazon\Core\Helper\Data $coreHelper,
         \Amazon\Alexa\Logger\AlexaLogger $alexaLogger,
         \Amazon\Alexa\Model\AlexaCarrierFactory $carrierFactory,
@@ -81,7 +74,6 @@ class Alexa
         \Psr\Log\LoggerInterface $logger
     ) {
         $this->alexaConfig      = $alexaConfig;
-        $this->amazonConfig     = $amazonConfig;
         $this->alexaLogger      = $alexaLogger;
         $this->carrierFactory   = $carrierFactory;
         $this->scopeConfig      = $scopeConfig;
@@ -183,7 +175,7 @@ class Alexa
             'public_key_id' => $publicKeyId,
             'private_key'   => $privateKey,
             'sandbox'       => false, // deliveryTrackers not available in sandbox mode
-            'region'        => $this->amazonConfig->getPaymentRegion()
+            'region'        => $this->coreHelper->getPaymentRegion()
         ];
 
         $payload = [
