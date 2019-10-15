@@ -36,19 +36,43 @@ class SalesOrderShipmentTrackAfter implements ObserverInterface
     private $alexaModel;
 
     /**
+     * @var \Magento\Framework\Message\ManagerInterface
+     */
+    private $messageManager;
+
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @var \Amazon\Core\Logger\AlexaLogger
+     */
+    private $alexaLogger;
+
+    /**
      * SalesOrderShipmentTrackAfter constructor.
      * @param \Amazon\Alexa\Model\AlexaConfig $alexaConfig
      * @param \Amazon\Core\Helper\Data
      * @param \Amazon\Alexa\Model\Alexa $alexaModel
+     * @param \Magento\Framework\Message\ManagerInterface $messageManager
+     * @param \Psr\Log\LoggerInterface $logger
+     * @param \Amazon\Alexa\Logger\AlexaLogger $alexaLogger
      */
     public function __construct(
         \Amazon\Alexa\Model\AlexaConfig $alexaConfig,
         \Amazon\Core\Helper\Data $coreHelper,
-        \Amazon\Alexa\Model\Alexa $alexaModel
+        \Amazon\Alexa\Model\Alexa $alexaModel,
+        \Magento\Framework\Message\ManagerInterface $messageManager,
+        \Psr\Log\LoggerInterface $logger,
+        \Amazon\Alexa\Logger\AlexaLogger $alexaLogger
     ) {
         $this->alexaConfig  = $alexaConfig;
         $this->coreHelper   = $coreHelper;
         $this->alexaModel   = $alexaModel;
+        $this->messageManager = $messageManager;
+        $this->logger           = $logger;
+        $this->alexaLogger      = $alexaLogger;
     }
 
     /**
@@ -56,15 +80,23 @@ class SalesOrderShipmentTrackAfter implements ObserverInterface
      */
     public function execute(Observer $observer)
     {
-        if (!$this->coreHelper->isPwaEnabled() || !$this->alexaConfig->isAlexaEnabled()) {
-            return;
-        }
+        try {
+            if (!$this->coreHelper->isPwaEnabled() || !$this->alexaConfig->isAlexaEnabled()) {
+                return;
+            }
 
-        /** @var \Magento\Sales\Model\Order\Shipment\Track $track */
-        $track = $observer->getEvent()->getTrack();
+            /** @var \Magento\Sales\Model\Order\Shipment\Track $track */
+            $track = $observer->getEvent()->getTrack();
 
-        if ($track->getShipment()->getOrder()->getPayment()->getMethod() == 'amazon_payment') {
-            $this->alexaModel->addDeliveryNotification($track);
+            if ($track->getShipment()->getOrder()->getPayment()->getMethod() == 'amazon_payment') {
+                $this->alexaModel->addDeliveryNotification($track);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error($e);
+            $this->alexaLogger->error($e->getMessage());
+            $this->messageManager->addWarningMessage(
+                __('Failed to submit tracking information to Amazon Alexa.')
+            );
         }
     }
 }

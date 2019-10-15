@@ -17,6 +17,7 @@
 namespace Amazon\Alexa\Model;
 
 use AmazonPayV2\Client as AmazonClient;
+use Magento\Framework\Exception\NotFoundException;
 
 class Alexa
 {
@@ -97,6 +98,11 @@ class Alexa
 
         /** @var \Amazon\Payment\Model\OrderLink $orderLink */
         $orderLink = $order->getExtensionAttributes()->getAmazonOrderReferenceId();
+        if(!$orderLink) {
+            throw new NotFoundException(
+                __('Could not get AmazonOrderReferenceId for order')
+            );
+        }
         $orderReference = $orderLink->getAmazonOrderReferenceId();
 
         // Send to Amazon API
