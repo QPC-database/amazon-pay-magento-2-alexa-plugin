@@ -75,6 +75,7 @@ class Alexa
         \Psr\Log\LoggerInterface $logger
     ) {
         $this->alexaConfig      = $alexaConfig;
+        $this->coreHelper       = $coreHelper;
         $this->alexaLogger      = $alexaLogger;
         $this->carrierFactory   = $carrierFactory;
         $this->scopeConfig      = $scopeConfig;
