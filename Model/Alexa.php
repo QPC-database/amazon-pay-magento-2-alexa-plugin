@@ -57,6 +57,11 @@ class Alexa
     private $logger;
 
     /**
+     * @var \Magento\Quote\Model\QuoteRepository
+     */
+    private $quoteRepository;
+
+    /**
      * Alexa constructor.
      * @param AlexaConfig $alexaConfig
      * @param \Amazon\Alexa\Logger\AlexaLogger $alexaLogger
@@ -64,6 +69,7 @@ class Alexa
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Framework\Message\ManagerInterface $messageManager
      * @param \Psr\Log\LoggerInterface $logger
+     * @param \Magento\Quote\Model\QuoteRepository $quoteRepository
      */
     public function __construct(
         AlexaConfig $alexaConfig,
@@ -72,7 +78,8 @@ class Alexa
         \Amazon\Alexa\Model\AlexaCarrierFactory $carrierFactory,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Framework\Message\ManagerInterface $messageManager,
-        \Psr\Log\LoggerInterface $logger
+        \Psr\Log\LoggerInterface $logger,
+        \Magento\Quote\Model\QuoteRepository $quoteRepository
     ) {
         $this->alexaConfig      = $alexaConfig;
         $this->coreHelper       = $coreHelper;
@@ -81,6 +88,7 @@ class Alexa
         $this->scopeConfig      = $scopeConfig;
         $this->messageManager   = $messageManager;
         $this->logger           = $logger;
+        $this->quoteRepository  = $quoteRepository;
     }
 
     /**
@@ -94,17 +102,31 @@ class Alexa
         /** @var \Magento\Sales\Model\Order\Shipment $shipment */
         $shipment = $track->getShipment();
 
-        /** @var \Magento\Sales\Model\Order $shipment */
+        /** @var \Magento\Sales\Model\Order $order */
         $order = $shipment->getOrder();
-
-        /** @var \Amazon\Payment\Model\OrderLink $orderLink */
-        $orderLink = $order->getExtensionAttributes()->getAmazonOrderReferenceId();
-        if(!$orderLink) {
+        if(!$order) {
             throw new NotFoundException(
+                __('Could not get order from shipment')
+            );
+        }
+
+        $quote = $this->quoteRepository->get($order->getQuoteId());
+        if(!$quote) {
+            throw new NotFoundException(
+                __('Could not get quote from order')
+            );
+        }
+
+        $orderReference = $quote->getExtensionAttributes()->getAmazonOrderReferenceId();
+        if(!$orderReference) {
+            throw new \Magento\Framework\Exception\NotFoundException(
                 __('Could not get AmazonOrderReferenceId for order')
             );
         }
-        $orderReference = $orderLink->getAmazonOrderReferenceId();
+
+	if($orderReference instanceof \Amazon\Payment\Model\QuoteLink) {
+		$orderReference = $orderReference->getAmazonOrderReferenceId();
+	}
 
         // Send to Amazon API
         $result = $this->submitDeliveryTracker(
