@@ -17,6 +17,7 @@
 namespace Amazon\Alexa\Model;
 
 use AmazonPayV2\Client as AmazonClient;
+use Magento\Framework\Exception\NotFoundException;
 
 class Alexa
 {
@@ -24,11 +25,6 @@ class Alexa
      * @var AlexaConfig
      */
     private $alexaConfig;
-
-    /**
-     * @var \Amazon\Core\Model\AmazonConfig
-     */
-    private $amazonConfig;
 
     /**
      * @var \Amazon\Core\Helper\Data
@@ -61,32 +57,38 @@ class Alexa
     private $logger;
 
     /**
+     * @var \Magento\Quote\Model\QuoteRepository
+     */
+    private $quoteRepository;
+
+    /**
      * Alexa constructor.
      * @param AlexaConfig $alexaConfig
-     * @param \Amazon\Core\Model\AmazonConfig $amazonConfig
      * @param \Amazon\Alexa\Logger\AlexaLogger $alexaLogger
      * @param \Amazon\Alexa\Model\AlexaCarrierFactory $carrierFactory
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Framework\Message\ManagerInterface $messageManager
      * @param \Psr\Log\LoggerInterface $logger
+     * @param \Magento\Quote\Model\QuoteRepository $quoteRepository
      */
     public function __construct(
         AlexaConfig $alexaConfig,
-        \Amazon\Core\Model\AmazonConfig $amazonConfig,
         \Amazon\Core\Helper\Data $coreHelper,
         \Amazon\Alexa\Logger\AlexaLogger $alexaLogger,
         \Amazon\Alexa\Model\AlexaCarrierFactory $carrierFactory,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Framework\Message\ManagerInterface $messageManager,
-        \Psr\Log\LoggerInterface $logger
+        \Psr\Log\LoggerInterface $logger,
+        \Magento\Quote\Model\QuoteRepository $quoteRepository
     ) {
         $this->alexaConfig      = $alexaConfig;
-        $this->amazonConfig     = $amazonConfig;
+        $this->coreHelper       = $coreHelper;
         $this->alexaLogger      = $alexaLogger;
         $this->carrierFactory   = $carrierFactory;
         $this->scopeConfig      = $scopeConfig;
         $this->messageManager   = $messageManager;
         $this->logger           = $logger;
+        $this->quoteRepository  = $quoteRepository;
     }
 
     /**
@@ -100,12 +102,31 @@ class Alexa
         /** @var \Magento\Sales\Model\Order\Shipment $shipment */
         $shipment = $track->getShipment();
 
-        /** @var \Magento\Sales\Model\Order $shipment */
+        /** @var \Magento\Sales\Model\Order $order */
         $order = $shipment->getOrder();
+        if(!$order) {
+            throw new NotFoundException(
+                __('Could not get order from shipment')
+            );
+        }
 
-        /** @var \Amazon\Payment\Model\OrderLink $orderLink */
-        $orderLink = $order->getExtensionAttributes()->getAmazonOrderReferenceId();
-        $orderReference = $orderLink->getAmazonOrderReferenceId();
+        $quote = $this->quoteRepository->get($order->getQuoteId());
+        if(!$quote) {
+            throw new NotFoundException(
+                __('Could not get quote from order')
+            );
+        }
+
+        $orderReference = $quote->getExtensionAttributes()->getAmazonOrderReferenceId();
+        if(!$orderReference) {
+            throw new \Magento\Framework\Exception\NotFoundException(
+                __('Could not get AmazonOrderReferenceId for order')
+            );
+        }
+
+	if($orderReference instanceof \Amazon\Payment\Model\QuoteLink) {
+		$orderReference = $orderReference->getAmazonOrderReferenceId();
+	}
 
         // Send to Amazon API
         $result = $this->submitDeliveryTracker(
@@ -183,7 +204,7 @@ class Alexa
             'public_key_id' => $publicKeyId,
             'private_key'   => $privateKey,
             'sandbox'       => false, // deliveryTrackers not available in sandbox mode
-            'region'        => $this->amazonConfig->getPaymentRegion()
+            'region'        => $this->coreHelper->getPaymentRegion()
         ];
 
         $payload = [

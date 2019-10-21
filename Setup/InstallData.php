@@ -78,7 +78,7 @@ class InstallData implements InstallDataInterface
     private function getCarriersFromCsv()
     {
         $fileDir = $this->moduleReader->getModuleDir(
-            \Magento\Framework\Module\Dir::MODULE_SETUP_DIR,
+            \Magento\Framework\Module\Dir::MODULE_ETC_DIR,
             'Amazon_Alexa'
         );
 
