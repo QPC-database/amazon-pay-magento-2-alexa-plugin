@@ -43,6 +43,8 @@ The status will show under:
    * Under individual Shipment -> Shipment History.
    
 ## Installation
+### (Prerequisite: write permissions to Magento 2 root folder)
+
 ### Install via composer (recommended):
 ```
 $ composer require amzn/amazon-pay-magento-2-alexa-plugin
@@ -61,7 +63,6 @@ $ php bin/magento setup:upgrade
 $ php bin/magento setup:di:compile
 $ php bin/magento cache:clean
 ```
-
 
 ## Dependencies
 
