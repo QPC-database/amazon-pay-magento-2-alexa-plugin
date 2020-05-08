@@ -3,7 +3,7 @@
 [Learn More about Amazon Pay](https://pay.amazon.com/sp/magento)
 
 ### Pre-Requisites
-* Magento 2.2.4 and above
+* Magento 2.2.4+, 2.3.x
 * Amazon Pay module enabled
 
 ## Alexa Delivery Notifications
@@ -17,19 +17,21 @@ Here's what your customer will experience:
 
 ## Configuring Alexa Delivery Notifications
 
-These are the required keys for Alexa Delivery Notifications:
+Private Key and Public Key Id are the required keys for Alexa Delivery Notifications. Follow the below instructions to get them from the Seller Central account(Please use admin account to log in)- 
 
-### Public and Private Key
-The utility link provided in the Alexa Delivery Notifications settings, generates a new Public and Private Key for Amazon Pay. 
-* Click 'Generate a new public/private key pair for Amazon Pay'. This saves the Private Key in the settings and displays the text `[encrypted]`.
-* Click 'Download Public Key' to save the Public Key locally.
-
-### Public Key ID
-To obtain the `Public Key ID`, you will need to email Amazon Pay and provide the `Merchant ID` and `Public Key`. Follow the steps below:
-
-* Click contact link in the 'Please contact Amazon Pay to receive the Public Key ID.'
-* `Public Key` and `Merchant ID` is attached to the email, click Send.
-* Amazon Pay Support will respond with the `Public Key ID` to the email address associated with the primary account holder in Seller Central.
+1. Navigate to Amazon Pay Integration Central
+2. Choose the "Alexa" Integration channel
+    1. From the "What are you looking to do?" drop-down menu select “Set up delivery notifications”
+    1. Select “Get instructions”
+3. Create a public/private key pair
+    1. Scroll down to the “API keys” section
+    1. Choose “Create keys”
+    1. Use the default “Generate API credentials” setting
+    1. Name your API keys. Use a descriptive name, the name will be used to differentiate between multiple keys when you need to manage them in Integration Central. When naming the keys, you should consider who is using it and what they’re using it for
+    1. Choose “Create keys” in the pop-up window to create the public/private key pair
+4. Store the private key and Public Key ID
+    1. Creating the key pair will automatically download the private key (.pem) file to your browser, you do not need the public key. Save the private key file in a secure location, you will need it to access Amazon Pay APIs.
+    1. Store your Public Key ID, you will need it to access Amazon Pay APIs. Unlike the private key file, you can return to this page at a later time to access your Public Key ID.
 
 ## Merchant Experience
 Once you have configured Alexa Delivery Notifications, your store is ready to use this feature.
